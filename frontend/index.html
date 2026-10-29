@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Analyze resume keywords against a job description and get recruiter-style feedback.">
+  <title>ClearCV — Resume Match & Review</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#"><span class="brand-mark">C</span><span>Clear<span class="brand-accent">CV</span></span></a>
+    <div class="topbar-right"><span class="privacy-dot"></span><span>Private local analysis</span><span class="top-pill">BETA</span></div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div class="eyebrow"><span class="eyebrow-line"></span> RESUME INTELLIGENCE</div>
+      <h1>Your next role starts<br>with a <span>stronger resume.</span></h1>
+      <p class="hero-copy">Compare your resume with a job description. Find important keywords, uncover gaps, and get practical recruiter-style feedback.</p>
+    </section>
+
+    <section class="workspace">
+      <form id="analyze-form" class="input-panel">
+        <div class="panel-heading">
+          <div><span class="step">01</span><h2>Build your analysis</h2></div>
+          <span class="required-note">Both fields required</span>
+        </div>
+
+        <label class="field-label" for="resume-file">Your resume <span class="muted">(PDF or DOCX)</span></label>
+        <label class="upload-zone" id="upload-zone" for="resume-file">
+          <input id="resume-file" name="file" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required>
+          <span class="upload-icon" aria-hidden="true">↑</span>
+          <span class="upload-title" id="upload-title">Drop your resume here or <u>browse files</u></span>
+          <span class="upload-subtitle" id="upload-subtitle">PDF or DOCX · Maximum 5 MB</span>
+        </label>
+
+        <div class="label-row">
+          <label class="field-label" for="job-description">Job description</label>
+          <span id="char-count" class="char-count">0 / 30,000</span>
+        </div>
+        <textarea id="job-description" name="job_description" maxlength="30000" minlength="50" placeholder="Paste the complete job description here — responsibilities, required skills, preferred qualifications, experience, and education..." required></textarea>
+        <div class="helper-row"><span class="helper-icon">i</span> Include the full JD for a more useful comparison.</div>
+
+        <div id="error-box" class="error-box" role="alert" hidden></div>
+        <button id="analyze-button" class="primary-button" type="submit"><span id="button-label">Analyze my resume</span><span class="button-arrow">→</span></button>
+        <p class="privacy-note"><span>▣</span> Files are processed in memory and are not saved by this app.</p>
+      </form>
+
+      <aside class="side-panel">
+        <div class="side-orb orb-one"></div><div class="side-orb orb-two"></div>
+        <div class="side-content">
+          <div class="mini-label">YOUR REVIEW, AT A GLANCE</div>
+          <div class="preview-score"><span class="preview-number">↗</span><div><strong>Match insights</strong><span>Not just a score. A plan.</span></div></div>
+          <div class="preview-line"></div>
+          <div class="preview-item"><span class="preview-check">✓</span><div><strong>Keyword alignment</strong><small>Required and preferred skills</small></div></div>
+          <div class="preview-item"><span class="preview-check">✓</span><div><strong>Recruiter review</strong><small>Clarity, impact and relevance</small></div></div>
+          <div class="preview-item"><span class="preview-check">✓</span><div><strong>Actionable next steps</strong><small>Prioritized improvement ideas</small></div></div>
+          <div class="side-footnote">Designed to support your application — not predict a hiring decision.</div>
+        </div>
+      </aside>
+    </section>
+
+    <section id="results" class="results" hidden>
+      <div class="results-heading">
+        <div><div class="eyebrow"><span class="eyebrow-line"></span> YOUR ANALYSIS</div><h2>Here's where you stand.</h2><p id="result-filename" class="result-subtitle"></p></div>
+        <button id="download-button" class="secondary-button" type="button">↓ Export report</button>
+      </div>
+      <div class="score-grid">
+        <article class="score-card score-main"><div class="card-label">OVERALL READINESS</div><div class="score-big"><span id="overall-score">—</span><small>/100</small></div><div class="score-track"><span id="overall-track"></span></div><p>JD match + resume structure</p></article>
+        <article class="score-card"><div class="card-label">JD REQUIREMENTS MATCHED</div><div class="score-medium"><span id="matched-count">—</span><small id="total-count"> requirements</small></div><p>Detected in your resume</p></article>
+        <article class="score-card"><div class="card-label">REQUIRED SKILLS MATCH</div><div class="score-medium"><span id="required-score">—</span><small>%</small></div><p>Mandatory signals found</p></article>
+        <article class="score-card"><div class="card-label">RESUME WORD COUNT</div><div class="score-medium"><span id="word-count">—</span></div><p>Extracted text</p></article>
+      </div>
+
+      <div class="results-columns">
+        <section class="result-card">
+          <div class="result-card-head"><div><span class="section-kicker">MODULE 01</span><h3>Keyword analysis</h3></div><span class="icon-badge">⌕</span></div>
+          <p class="card-description">Skills and requirements found in the job description, compared with your resume.</p>
+          <div class="filter-row"><button class="filter-chip active" data-filter="all" type="button">All <span id="filter-all-count">0</span></button><button class="filter-chip" data-filter="matched" type="button">Matched <span id="filter-matched-count">0</span></button><button class="filter-chip" data-filter="not_found" type="button">Not found <span id="filter-missing-count">0</span></button></div>
+          <div id="requirements-list" class="requirements-list"></div>
+          <div id="no-requirements" class="empty-state" hidden>No recognized requirements were detected. Try including a more complete job description.</div>
+        </section>
+
+        <section class="result-card">
+          <div class="result-card-head"><div><span class="section-kicker">MODULE 02</span><h3>Recruiter-style review</h3></div><span class="icon-badge">✓</span></div>
+          <p class="card-description">A structured review of resume evidence, presentation, and areas to strengthen.</p>
+          <div id="review-list" class="review-list"></div>
+        </section>
+      </div>
+
+      <section class="result-card next-steps-card">
+        <div class="result-card-head"><div><span class="section-kicker">YOUR ACTION PLAN</span><h3>What to improve next</h3></div><span class="icon-badge">↗</span></div>
+        <p class="card-description">Prioritized suggestions based on the detected gaps. Only include claims that are true for you.</p>
+        <div id="action-plan" class="action-plan"></div>
+      </section>
+      <p id="score-note" class="score-disclaimer"></p>
+    </section>
+    <footer><span>ClearCV</span><span>Thoughtful feedback. More confident applications.</span></footer>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>
